@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 9;
+use Test::More tests => 10;
 
 BEGIN {
         chdir 't' if -d 't';
@@ -19,6 +19,8 @@ ok(!$writer->write_file(), "write_file should fail without a filename or handle"
 ok(!$writer->write_file('/fake/file'), "write_file should fail without data");
 
 ok($writer->write_mem({'foo' => 'bar'}) eq "foo: bar\n", "write_* should translate simple items correctly");
+
+ok($writer->write_mem({'foo' => ''}) eq "foo:\n", "write_* should accept (begrudgingly) blank hashkeys");
 
 SKIP: 	{
 		eval { require Tie::IxHash };

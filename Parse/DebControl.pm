@@ -13,7 +13,7 @@ use strict;
 use IO::Scalar;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.2b';
+$VERSION = '1.3';
 
 @ISA=qw(Exporter);
 @EXPORT=qw/new parse_file parse_mem write_file write_mem DEBUG/;
@@ -179,7 +179,11 @@ sub _makeControl
 		foreach my $key(keys %$stanza)
 		{
 			my @lines = split("\n", $stanza->{$key});
-			$str.="$key\: ".(shift @lines)."\n";
+			if (@lines) {
+				$str.="$key\: ".(shift @lines)."\n";
+			} else {
+				$str.="$key\:\n";
+			}
 
 			foreach(@lines)
 			{
@@ -457,47 +461,63 @@ It is useful for nailing down any format or internal problems.
 
 =head1 CHANGES
 
+B<Version 1.3> - April 28th, 2003
+
 =over 4
 
-=item * B<Version 1.2b> - April 25th, 2003
+=item * Fixed a bug where writing blank stanzas would throw a warning.  Fix found and supplied by Nate Oostendorp.
+
+=back
+
+B<Version 1.2b> - April 25th, 2003
 
 Fixed:
-	* A bug in the test suite where IxHash was not disabled in 40write.t. Thanks to Jeroen Latour from cpan-testers for the report.
 
-=item * B<Version 1.2> - April 24th, 2003
+=over 4
+
+=item * A bug in the test suite where IxHash was not disabled in 40write.t. Thanks to Jeroen Latour from cpan-testers for the report.
+
+=back
+
+B<Version 1.2> - April 24th, 2003
 
 Fixed:
 
-	* A bug in IxHash support where multiple stanzas might be out of order
+=over 4
 
-=item * B<Version 1.1> - April 23rd, 2003
+=item * A bug in IxHash support where multiple stanzas might be out of order
+
+=back
+
+B<Version 1.1> - April 23rd, 2003
 
 Added:
 
-	* Writing support
-	* Tie::IxHash support
-	* Case insensitive reading support
+=over 4
 
-=item * B<Version 1.0> - April 23rd, 2003
+=item * Writing support
 
-This is the initial public release for CPAN, so everything is new.
+=item * Tie::IxHash support
+
+=item * Case insensitive reading support
+
+=back
+
+* B<Version 1.0> - April 23rd, 2003
+
+=over 4
+
+=item * This is the initial public release for CPAN, so everything is new.
 
 =back
 
 =head1 BUGS
 
-The module will let you parse otherwise illegal key-value pairs and pairs
-with spaces. This is by design. In future versions, it may give you a warning.
+The module will let you parse otherwise illegal key-value pairs and pairs with spaces. Badly formed stanzas will do things like overwrite duplicate keys, etc.  This is your problem.
 
 =head1 TODO
 
-=over 4
-
-=item Handle line wrapping for long lines, maybe. 
-
-	I'm debating whether or not this is outside the scope of this module
-
-=back
+None, I<so far.>
 
 =head1 COPYRIGHT
 
