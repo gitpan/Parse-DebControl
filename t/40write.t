@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 
 BEGIN {
         chdir 't' if -d 't';
@@ -24,7 +24,7 @@ my $test1 = "Test: Item1\nTest2: Item2\nTest3: Item3\n";
 my $test2 = "Test: Items\n Hello\n There\n .\n World\nAnother-item: world\n";
 my $i = 1;
 
-foreach($test1, $test2){
+foreach($test1, $test2, "$test1\n$test2"){
 	ok($writer->write_mem($writer->parse_mem($_, {'useTieIxHash' => 1})) eq $_, "...Fidelity test $i");
 	$i++;
 }

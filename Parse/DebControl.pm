@@ -13,7 +13,7 @@ use strict;
 use IO::Scalar;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.1';
+$VERSION = '1.2';
 
 @ISA=qw(Exporter);
 @EXPORT=qw/new parse_file parse_mem write_file write_mem DEBUG/;
@@ -214,18 +214,7 @@ sub _parseDataHandle
 		return;
 	}
 
-	my $data;
-
-	if($options->{useTieIxHash})
-	{
-		eval("use Tie::IxHash");
-		if($@)
-		{
-			$this->_dowarn("Can't use Tie::IxHash. You need to install it to have this functionality");
-			return;
-		}
-		tie(%$data, "Tie::IxHash");
-	}
+	my $data = $this->_getReadyHash($options);
 
 	my $linenum = 0;
 	my $lastfield = "";
@@ -276,7 +265,7 @@ sub _parseDataHandle
 			if(keys %$data > 0){
 				push @$structs, $data;
 			}
-			$data = {};
+			$data = $this->_getReadyHash($options);
 			$lastfield = "";
 		}else{
 			$this->_dowarn("Parse error on line $linenum of data; unidentified line structure");
@@ -291,6 +280,26 @@ sub _parseDataHandle
 	}
 
 	return $structs;
+}
+
+sub _getReadyHash
+{
+	my ($this, $options) = @_;
+	my $data;
+
+	if($options->{useTieIxHash})
+	{
+		eval("use Tie::IxHash");
+		if($@)
+		{
+			$this->_dowarn("Can't use Tie::IxHash. You need to install it to have this functionality");
+			return;
+		}
+		tie(%$data, "Tie::IxHash");
+		return $data;
+	}
+
+	return {};
 }
 
 sub _dowarn
@@ -449,6 +458,13 @@ It is useful for nailing down any format or internal problems.
 =head1 CHANGES
 
 =over 4
+
+=item * B<Version 1.2> - April 24th, 2003
+
+Fixed:
+
+	* A bug in IxHash support where multiple stanzas
+		might be out of order
 
 =item * B<Version 1.1> - April 23rd, 2003
 
