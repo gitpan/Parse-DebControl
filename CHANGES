@@ -1,3 +1,8 @@
+Version 1.9 - July 24th, 2003
+
+	* Fix for warning for edge case (uninitialized value in chomp)
+	* Tests for CRLF
+
 Version 1.8 - July 14th, 2003
 	
 	* By default, we now strip off whitespace unless verbMultiLine is in place.  This makes sense for things like conf files where trailing whitespace has no real meaning. Thanks to pudge, who reported this.

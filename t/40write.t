@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 12;
+use Test::More tests => 14;
 
 my $warning ="";
 
@@ -29,6 +29,8 @@ ok($writer->write_mem({'foo' => ''}) eq "foo:\n", "write_* should accept (begrud
 ok($writer->write_mem({'foo' => undef}) eq "foo:\n", "write_* should correctly handle undef items");
 
 
+
+
 SKIP: 	{
 		eval { require Tie::IxHash };
 		skip "Tie::IxHash is not installed", 3 if($@);
@@ -48,5 +50,11 @@ my $warnings = "";
 local $SIG{__WARN__} = sub { $warnings = $_};
 
 my $mem = $writer->write_mem([{}]);
-
 ok($warnings eq "", "Writing blank hashrefs doesn't throw warnings"); #Version 1.6 fix
+
+$mem = $writer->write_mem([]);
+ok($warnings eq "", "Writing blank arrayrefs doesn't throw warnings"); #Version 1.9 fix
+
+$mem = $writer->write_mem();
+ok($warnings eq "", "Writing blank arrayrefs doesn't throw warnings"); #Version 1.9 fix
+

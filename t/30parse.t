@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 63;
+use Test::More tests => 68;
 
 BEGIN {
         chdir 't' if -d 't';
@@ -119,3 +119,13 @@ my $mod = "Parse::DebControl";
 	ok($data = $pdc->parse_mem("Key1: value1 ", {verbMultiLine => 1}), "Single line verbatim option parses correctly, (verbatim whitespace save test)");
 	ok($data->[0]->{Key1} eq "value1 ", "verbMultiLine does not collapse trailing whitespace");
 	
+
+#CRLF tests - 5 tests
+
+	ok($data = $pdc->parse_mem("Key1: value1\r\nKey2: Value2 \r\n"), "CRLF parses correctly");
+	ok(@$data == 1, "...and there is one stanza");
+	ok(keys %{$data->[0]} == 2, "...and the firest stanza is the right size");
+	ok($data->[0]->{Key1} eq "value1", "...and the first valus is correct");
+	ok($data->[0]->{Key2} eq "Value2", "...and the second value is correct");
+
+

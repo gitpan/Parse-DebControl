@@ -13,7 +13,7 @@ use strict;
 use IO::Scalar;
 
 use vars qw($VERSION);
-$VERSION = '1.8';
+$VERSION = '1.9';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -170,7 +170,7 @@ sub _makeControl
 {
 	my ($this, $dataorarrayref) = @_;
 	
-	my $str;
+	my $str = "";
 
 	foreach my $stanza(@$dataorarrayref)
 	{
@@ -227,7 +227,10 @@ sub _parseDataHandle
 	foreach my $line (<$handle>)
 	{
 		#Sometimes with IO::Scalar, lines may have a newline at the end
+
+		#$line =~ s/\r??\n??$//; #CRLF fix, but chomp seems to clean it
 		chomp $line;
+		
 
 		if($options->{stripComments}){
 			next if $line =~ /^\s*\#/;
@@ -491,7 +494,17 @@ It is useful for nailing down any format or internal problems.
 
 =head1 CHANGES
 
-B<Version 1.7> - July 11th, 2003
+B<Version 1.9> - July 24th, 2003
+
+=over 4
+
+=item * Fix for warning for edge case (uninitialized value in chomp)
+
+=item * Tests for CRLF
+
+=back
+
+B<Version 1.8> - July 11th, 2003
 
 =over 4
 
