@@ -15,7 +15,7 @@ use Compress::Zlib;
 use LWP::UserAgent;
 
 use vars qw($VERSION);
-$VERSION = '2.003';
+$VERSION = '2.004';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -141,6 +141,8 @@ sub write_mem {
 	my $arrayref = $this->_makeArrayref($dataorarrayref);
 
 	my $string = $this->_makeControl($arrayref);
+
+	$string .= "\n" if $options->{addNewline};
 
 	$string = Compress::Zlib::memGzip($string) if $options->{gzip};
 
@@ -539,12 +541,19 @@ reading back in, the module doesn't care.
 
 The I<$options> hashref can contain one of the following two items:
 
+	addNewline - At the end of the last stanza, add an additional newline.
 	appendFile  - (default) Write to the end of the file
 	clobberFile - Overwrite the file given.
 	gzip - Compress the data with gzip before writing
 
 Since you determine the mode of your filehandle, passing it along with an 
 options hashref obviously won't do anything; rather, it is ignored.
+
+The I<addNewline> option solves a situation where if you are writing
+stanzas to a file in a loop (such as logging with this module), then
+the data will be streamed together, and won't parse back in correctly.
+It is possible that this is the behavior that you want (if you wanted to write 
+one key at a time), so it is optional.
 
 This function returns the number of bytes written to the file, undef 
 otherwise.
@@ -575,7 +584,23 @@ It is useful for nailing down any format or internal problems.
 
 =head1 CHANGES
 
-B<Version 2.003> - January 6th, 2003
+B<Version 2.004> - January 12th, 2004
+
+=over 4
+
+=item * More documentation formatting and typo fixes
+
+=item * CHANGES file now generated automatically
+
+=item * Fixes for potential test suite failure in Pod::Coverage run
+
+=item * Adds the "addNewline" option to write_file to solve the streaming stanza problem.
+
+=item * Adds tests for the addNewline option
+
+=back
+
+B<Version 2.003> - January 6th, 2004
 
 =over 4
 
@@ -749,7 +774,7 @@ Added:
 
 =back
 
-* B<Version 1.0> - April 23rd, 2003
+B<Version 1.0> - April 23rd, 2003
 
 =over 4
 
