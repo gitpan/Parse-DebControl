@@ -1,3 +1,8 @@
+Version 1.10 - September 2nd, 2003
+
+	* Documentation fixes, as pointed out by pudge
+	* Adds a feature to stripComments where ## will get interpolated as a literal pound sign, as suggested by pudge.
+
 Version 1.9 - July 24th, 2003
 
 	* Fix for warning for edge case (uninitialized value in chomp)

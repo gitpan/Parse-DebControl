@@ -13,7 +13,7 @@ use strict;
 use IO::Scalar;
 
 use vars qw($VERSION);
-$VERSION = '1.9';
+$VERSION = '1.10';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -233,8 +233,10 @@ sub _parseDataHandle
 		
 
 		if($options->{stripComments}){
-			next if $line =~ /^\s*\#/;
-			$line =~ s/\#.*// 
+			next if $line =~ /^\s*\#[^\#]/;
+			$line =~ s/\#$//;
+			$line =~ s/(?<=[^\#])\#[^\#].*//;
+			$line =~ s/\#\#/\#/;
 		}
 
 		$linenum++;
@@ -361,19 +363,19 @@ Parse::DebControl - Easy OO parsing of debian control-like files
 
 	$parser = new Parse::DebControl;
 
-	$data = $parser->parse_mem($control_data, %options);
-	$data = $parser->parse_file('./debian/control', %options);
+	$data = $parser->parse_mem($control_data, $options);
+	$data = $parser->parse_file('./debian/control', $options);
 
 	$writer = new Parse::DebControl;
 
 	$string = $writer->write_mem($singlestanza);
 	$string = $writer->write_mem([$stanza1, $stanza2]);
 
-	$writer->write_file($filename, $singlestanza, %options);
-	$writer->write_file($filename, [$stanza1, $stanza2], %options);
+	$writer->write_file($filename, $singlestanza, $options);
+	$writer->write_file($filename, [$stanza1, $stanza2], $options);
 
-	$writer->write_file($handle, $singlestanza, %options);
-	$writer->write_file($handle, [$stanza1, $stanza2], %options);
+	$writer->write_file($handle, $singlestanza, $options);
+	$writer->write_file($handle, [$stanza1, $stanza2], $options);
 
 	$parser->DEBUG();
 
@@ -407,22 +409,23 @@ passed in, it turns on debugging, similar to a call to C<DEBUG()> (see below);
 
 =over 4
 
-=item * C<parse_file($control_filename,I<%options>)>
+=item * C<parse_file($control_filename,I<$options>)>
 
-Takes a filename as a scalar. Will parse as much as it can, 
-warning (if C<DEBUG>ing is turned on) on parsing errors. 
+Takes a filename as a scalar and an optional hashref of options (see below). 
+Will parse as much as it can, warning (if C<DEBUG>ing is turned on) on 
+parsing errors. 
 
-Returns an array of hashes, containing the data in the control file, split up
+Returns an array of hashrefs, containing the data in the control file, split up
 by stanza.  Stanzas are deliniated by newlines, and multi-line fields are
 expressed as such post-parsing.  Single periods are treated as special extra
 newline deliniators, per convention.  Whitespace is also stripped off of lines
 as to make it less-easy to make mistakes with hand-written conf files).
 
-The options hash can take parameters as follows. Setting the string to true
+The options hashref can take parameters as follows. Setting the string to true
 enables the option.
 
-	useTieIxHash - Instead of an array of regular hashes, uses Tie::IxHash-
-		based hashes
+	useTieIxHash - Instead of an array of regular hashrefs, uses Tie::IxHash-
+		based hashrefs
 	discardCase  - Remove all case items from keys (not values)		
 	stripComments - Remove all commented lines in standard #comment format
 	verbMultiLine - Keep the description AS IS, and no not collapse leading
@@ -433,37 +436,37 @@ enables the option.
 
 =over 4
 
-=item * C<parse_mem($control_data, I<%options>)>
+=item * C<parse_mem($control_data, I<$options>)>
 
 Similar to C<parse_file>, except takes data as a scalar. Returns the same
-array of hashrefs as C<parse_file>. The options hash is the same as 
+array of hashrefs as C<parse_file>. The options hashref is the same as 
 C<parse_file> as well; see above.
 
 =back
 
 =over 4
 
-=item * C<write_file($filename, $data, I<%options>)>
+=item * C<write_file($filename, $data, I<$options>)>
 
 =item * C<write_file($handle, $data>
 
-=item * C<write_file($filename, [$data1, $data2, $data3], I<%options>)>
+=item * C<write_file($filename, [$data1, $data2, $data3], I<$options>)>
 
 =item * C<write_file($handle, [$data, $data2, $data3])>
 
 This function takes a filename or a handle and writes the data out.  The 
-data can be given as a single hash(ref) or as an arrayref of hash(ref)s. It
+data can be given as a single hashref or as an arrayref of hashrefs. It
 will then write it out in a format that it can parse. The order is dependant
 on your hash sorting order. If you care, use Tie::IxHash.  Remember for 
 reading back in, the module doesn't care.
 
-The I<%options> hash can contain one of the following two items:
+The I<$options> hashref can contain one of the following two items:
 
 	appendFile  - (default) Write to the end of the file
 	clobberFile - Overwrite the file given.
 
-Since you determine the mode of your filehandle, passing it an options hash
-obviously won't do anything; rather, it is ignored.
+Since you determine the mode of your filehandle, passing it along with an 
+options hashref obviously won't do anything; rather, it is ignored.
 
 This function returns the number of bytes written to the file, undef 
 otherwise.
@@ -493,6 +496,16 @@ It is useful for nailing down any format or internal problems.
 =back
 
 =head1 CHANGES
+
+B<Version 1.10> - September 2nd, 2003
+
+=over 4
+
+=item * Documentation fixes, as pointed out by pudge
+
+=item * Adds a feature to stripComments where ## will get interpolated as a literal pound sign, as suggested by pudge.
+
+=back
 
 B<Version 1.9> - July 24th, 2003
 
@@ -615,6 +628,8 @@ Added:
 =head1 BUGS
 
 The module will let you parse otherwise illegal key-value pairs and pairs with spaces. Badly formed stanzas will do things like overwrite duplicate keys, etc.  This is your problem.
+
+As of 1.10, the module uses advanced regexp's to figure out about comments.  If the tests fail, then stripComments won't work on your earlier perl version (should be fine on 5.6.0+)
 
 =head1 TODO
 
