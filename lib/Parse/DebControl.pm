@@ -11,9 +11,11 @@ package Parse::DebControl;
 
 use strict;
 use IO::Scalar;
+use Compress::Zlib;
+use LWP::UserAgent;
 
 use vars qw($VERSION);
-$VERSION = '1.10b';
+$VERSION = '2.0';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -66,6 +68,35 @@ sub parse_mem {
 
 };
 
+sub parse_web {
+	my ($this, $url, $options) = @_;
+
+	unless($url)
+	{
+		$this->_dowarn("No url given, thus no data to parse");
+		return;
+	}
+
+	my $ua = LWP::UserAgent->new;
+
+	my $request = HTTP::Request->new(GET => $url);
+
+	unless($request)
+	{
+		$this->_dowarn("Failed to instantiate HTTP Request object");
+		return;
+	}
+
+	my $response = $ua->request($request);
+
+	if ($response->is_success) {
+		return $this->parse_mem($response->content(), $options);
+	} else {
+		$this->_dowarn("Failed to fetch $url from the web");
+		return;
+	}
+}
+
 sub write_file {
 	my ($this, $filenameorhandle, $dataorarrayref, $options) = @_;
 
@@ -112,6 +143,8 @@ sub write_mem {
 	my $arrayref = $this->_makeArrayref($dataorarrayref);
 
 	my $string = $this->_makeControl($arrayref);
+
+	$string = Compress::Zlib::memGzip($string) if $options->{gzip};
 
 	return $string;
 }
@@ -219,6 +252,14 @@ sub _parseDataHandle
 		return;
 	}
 
+	if($options->{tryGzip})
+	{
+		if(my $gunzipped = $this->_tryGzipInflate($handle))
+		{
+			$handle = new IO::Scalar \$gunzipped
+		}
+	}
+
 	my $data = $this->_getReadyHash($options);
 
 	my $linenum = 0;
@@ -316,6 +357,18 @@ sub _parseDataHandle
 	return $structs;
 }
 
+sub _tryGzipInflate
+{
+	my ($this, $handle) = @_;
+
+	my $buffer;
+	{
+		local $/ = undef;
+		$buffer = <$handle>;
+	}
+	return Compress::Zlib::memGunzip($buffer) || $buffer;
+}
+
 sub _getReadyHash
 {
 	my ($this, $options) = @_;
@@ -365,6 +418,7 @@ Parse::DebControl - Easy OO parsing of debian control-like files
 
 	$data = $parser->parse_mem($control_data, $options);
 	$data = $parser->parse_file('./debian/control', $options);
+	$data = $parser->parse_web($url, $options);
 
 	$writer = new Parse::DebControl;
 
@@ -441,6 +495,12 @@ enables the option.
 		spaces or dots as newlines. This also keeps whitespace from being
 		stripped off the end of lines.
 
+	tryGzip	- Attempt to expand the data chunk with gzip first. If the text is
+		already expanded (ie: plain text), parsing will continue normally. 
+		This could optionally be turned on for all items in the future, but
+		it is off by default so we don't have to scrub over all the text for
+		performance reasons.
+
 =back
 
 =over 4
@@ -450,6 +510,16 @@ enables the option.
 Similar to C<parse_file>, except takes data as a scalar. Returns the same
 array of hashrefs as C<parse_file>. The options hashref is the same as 
 C<parse_file> as well; see above.
+
+=back
+
+=over 4
+
+=item * C<parse_web($url, I<$options>)>
+
+Similar to the other parse_* functions, this pulls down a control file from
+the web and attempts to parse it. For options and return values, see C<parse_file>, 
+above
 
 =back
 
@@ -473,6 +543,7 @@ The I<$options> hashref can contain one of the following two items:
 
 	appendFile  - (default) Write to the end of the file
 	clobberFile - Overwrite the file given.
+	gzip - Compress the data with gzip before writing
 
 Since you determine the mode of your filehandle, passing it along with an 
 options hashref obviously won't do anything; rather, it is ignored.
@@ -505,6 +576,20 @@ It is useful for nailing down any format or internal problems.
 =back
 
 =head1 CHANGES
+
+B<Version 2.0> - September 5th, 2003
+
+=over 4
+
+=item * Version increase.
+
+=item * Added gzip support (with the tryGzip option), so that compresses control files can be parsed on the fly
+
+=item * Added gzip support for writing of control files
+
+=item * Added parse_web to snag files right off the web. Useful for things such as apt's Sources.gz and Packages.gz
+
+=back
 
 B<Version 1.10b> - September 2nd, 2003
 

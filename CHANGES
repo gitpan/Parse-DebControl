@@ -1,3 +1,10 @@
+Version 2.0 - September 5th, 2003
+
+	* Version increase.
+	* Added gzip support (with the tryGzip option), for reading of stanzas, so that compresses control files can be parsed on the fly
+	* Added gzip support for writing of control files
+	* Added parse_web to snag files right off the web. Useful for things such as apt's Sources.gz and Packages.gz
+
 Version 1.10b - September 2nd, 2003
 
 	*  Documentation fix for ## vs # in stripComments
