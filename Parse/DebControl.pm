@@ -12,11 +12,8 @@ package Parse::DebControl;
 use strict;
 use IO::Scalar;
 
-use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.3';
-
-@ISA=qw(Exporter);
-@EXPORT=qw/new parse_file parse_mem write_file write_mem DEBUG/;
+use vars qw($VERSION);
+$VERSION = '1.4';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -461,6 +458,14 @@ It is useful for nailing down any format or internal problems.
 
 =head1 CHANGES
 
+B<Version 1.4> - April 30th, 2003
+
+=over 4
+
+=item * Removed exports as they were unnecessary. Many thanks to pudge, who pointed this out.
+
+=back
+
 B<Version 1.3> - April 28th, 2003
 
 =over 4
@@ -517,7 +522,7 @@ The module will let you parse otherwise illegal key-value pairs and pairs with s
 
 =head1 TODO
 
-None, I<so far.>
+Change the name over to the Debian:: namespace, probably as Debian::ControlFormat.  This will happen as soon as the project that uses this module reaches stability, and we can do some minor tweaks.
 
 =head1 COPYRIGHT
 
