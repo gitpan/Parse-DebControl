@@ -13,7 +13,7 @@ use strict;
 use IO::Scalar;
 
 use vars qw($VERSION);
-$VERSION = '1.10';
+$VERSION = '1.10b';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -426,8 +426,17 @@ enables the option.
 
 	useTieIxHash - Instead of an array of regular hashrefs, uses Tie::IxHash-
 		based hashrefs
+
 	discardCase  - Remove all case items from keys (not values)		
-	stripComments - Remove all commented lines in standard #comment format
+
+	stripComments - Remove all commented lines in standard #comment format.
+		Literal #'s are represented by ##. For instance
+
+		Hello there #this is a comment
+		Hello there, I like ##CCCCCC as a grey.
+
+		The first is a comment, the second is a literal "#".
+
 	verbMultiLine - Keep the description AS IS, and no not collapse leading
 		spaces or dots as newlines. This also keeps whitespace from being
 		stripped off the end of lines.
@@ -496,6 +505,14 @@ It is useful for nailing down any format or internal problems.
 =back
 
 =head1 CHANGES
+
+B<Version 1.10b> - September 2nd, 2003
+
+=over 4
+
+=item * Documentation fix for ## vs # in stripComments
+
+=back
 
 B<Version 1.10> - September 2nd, 2003
 
