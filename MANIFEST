@@ -1,4 +1,4 @@
-Parse/DebControl.pm
+lib/Parse/DebControl.pm
 t/10objects.t
 t/20new.t
 t/30parse.t

@@ -13,7 +13,7 @@ use strict;
 use IO::Scalar;
 
 use vars qw($VERSION);
-$VERSION = '1.4';
+$VERSION = '1.5';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -175,6 +175,8 @@ sub _makeControl
 	{
 		foreach my $key(keys %$stanza)
 		{
+			$stanza->{$key} ||= "";
+
 			my @lines = split("\n", $stanza->{$key});
 			if (@lines) {
 				$str.="$key\: ".(shift @lines)."\n";
@@ -457,6 +459,13 @@ It is useful for nailing down any format or internal problems.
 =back
 
 =head1 CHANGES
+
+B<Version 1.5> - May 8th, 2003
+
+=over 4
+
+=item * Added a line to quash errors with undef hashkeys and writing
+=item * Fixed the Makefile.PL to straighten up DebControl.pm being in the wrong dir
 
 B<Version 1.4> - April 30th, 2003
 

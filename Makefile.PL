@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
 	'NAME'		=> 'Parse::DebControl',
-	'VERSION_FROM'	=> 'Parse/DebControl.pm', # finds $VERSION
+	'VERSION_FROM'	=> 'lib/Parse/DebControl.pm', # finds $VERSION
 	'PREREQ_PM'	=>
 		{ 
 			'Test::More' => '0.45',
@@ -18,7 +18,7 @@ WriteMakefile(
 
 	($] >= 5.005 ?    ## Add these new keywords supported since 5.005
 		(
-			ABSTRACT_FROM	=> 'Parse/DebControl.pm', # retrieve abstract from module
+			ABSTRACT_FROM	=> 'lib/Parse/DebControl.pm', # retrieve abstract from module
 			AUTHOR     	=> 'Jay Bonci <jaybonci@cpan.org>') 
 		: ()),
 );

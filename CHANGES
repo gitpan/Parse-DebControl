@@ -1,3 +1,8 @@
+Version 1.5 - May 8th, 2003
+
+	* Added a line to quash errors with undef hashkeys and writing
+	* Fixed the Makefile.PL to straighten up DebControl.pm being in the wrong dir
+
 Version 1.4 - April 30th, 2003
 
 	* Removed exports as they were unnecessary. Many thanks to pudge, who pointed this out.

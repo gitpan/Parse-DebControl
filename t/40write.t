@@ -1,10 +1,14 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 10;
+use strict;
+use Test::More tests => 11;
+
+my $warning ="";
 
 BEGIN {
         chdir 't' if -d 't';
         use lib '../blib/lib', 'lib/', '..';
+
 }
 
 
@@ -21,6 +25,9 @@ ok(!$writer->write_file('/fake/file'), "write_file should fail without data");
 ok($writer->write_mem({'foo' => 'bar'}) eq "foo: bar\n", "write_* should translate simple items correctly");
 
 ok($writer->write_mem({'foo' => ''}) eq "foo:\n", "write_* should accept (begrudgingly) blank hashkeys");
+
+ok($writer->write_mem({'foo' => undef}) eq "foo:\n", "write_* should correctly handle undef items");
+
 
 SKIP: 	{
 		eval { require Tie::IxHash };
