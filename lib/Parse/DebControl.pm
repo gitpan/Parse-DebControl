@@ -13,7 +13,7 @@ use strict;
 use IO::Scalar;
 
 use vars qw($VERSION);
-$VERSION = '1.6';
+$VERSION = '1.6.1';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -469,12 +469,22 @@ It is useful for nailing down any format or internal problems.
 
 =head1 CHANGES
 
+B<Version 1.6.1> - June 9th, 2003
+
+=over 4
+
+=item * POD cleanups noticed by Frank Lichtenheld. Thank you, Frank.
+
+=back
+
 B<Version 1.6> - June 2nd, 2003
 
 =over 4
 
 =item * Cleaned up some warnings when you pass in empty hashrefs or arrayrefs
+
 =item * Added stripComments setting
+
 =item * Cleaned up POD errors
 
 =back
@@ -484,6 +494,7 @@ B<Version 1.5> - May 8th, 2003
 =over 4
 
 =item * Added a line to quash errors with undef hashkeys and writing
+
 =item * Fixed the Makefile.PL to straighten up DebControl.pm being in the wrong dir
 
 =back
