@@ -1,0 +1,7 @@
+Parse/DebControl.pm
+t/10objects.t
+t/20new.t
+t/30parse.t
+Makefile.PL
+MANIFEST
+CHANGES
