@@ -1,3 +1,7 @@
+Version 1.8 - July 14th, 2003
+	
+	* By default, we now strip off whitespace unless verbMultiLine is in place.  This makes sense for things like conf files where trailing whitespace has no real meaning. Thanks to pudge, who reported this.
+
 Version 1.7 - June 25th, 2003
 	
 	* POD documentation error noticed again by Frank Lichtenheld

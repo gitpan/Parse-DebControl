@@ -13,7 +13,7 @@ use strict;
 use IO::Scalar;
 
 use vars qw($VERSION);
-$VERSION = '1.7';
+$VERSION = '1.8';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -245,15 +245,22 @@ sub _parseDataHandle
 
 				if($options->{discardCase})
 				{
-					$key = lc($key);					
+					$key = lc($key);
+				}
+
+				unless($options->{verbMultiLine})
+				{
+					$value =~ s/[\s\t]+$//;
 				}
 
 				$data->{$key} = $value;
 
+
 				if ($options->{verbMultiLine} 
-				    && (($data->{$lastfield} || "") =~ /\n/o)){
-				    $data->{$lastfield} .= "\n";
+					&& (($data->{$lastfield} || "") =~ /\n/o)){
+					$data->{$lastfield} .= "\n";
 				}
+
 				$lastfield = $key;
 			}else{
 				$this->_dowarn("Parse error on line $linenum of data; invalid key/value stanza");
@@ -270,11 +277,13 @@ sub _parseDataHandle
 				return $structs;
 			}
 			if($options->{verbMultiLine}){
-			    $data->{$lastfield}.="\n$1$2";
+				$data->{$lastfield}.="\n$1$2";
 			}elsif($2 eq "." ){
-			    $data->{$lastfield}.="\n";
+				$data->{$lastfield}.="\n";
 			}else{
-			    $data->{$lastfield}.="\n$2";
+				my $val = $2;
+				$val =~ s/[\s\t]+$//;
+				$data->{$lastfield}.="\n$val";
 			}
 
 		}elsif($line =~ /^[\s\t]*$/){
@@ -403,7 +412,8 @@ warning (if C<DEBUG>ing is turned on) on parsing errors.
 Returns an array of hashes, containing the data in the control file, split up
 by stanza.  Stanzas are deliniated by newlines, and multi-line fields are
 expressed as such post-parsing.  Single periods are treated as special extra
-newline deliniators, per convention.
+newline deliniators, per convention.  Whitespace is also stripped off of lines
+as to make it less-easy to make mistakes with hand-written conf files).
 
 The options hash can take parameters as follows. Setting the string to true
 enables the option.
@@ -413,7 +423,8 @@ enables the option.
 	discardCase  - Remove all case items from keys (not values)		
 	stripComments - Remove all commented lines in standard #comment format
 	verbMultiLine - Keep the description AS IS, and no not collapse leading
-		spaces or dots as newlines.
+		spaces or dots as newlines. This also keeps whitespace from being
+		stripped off the end of lines.
 
 =back
 
@@ -479,6 +490,14 @@ It is useful for nailing down any format or internal problems.
 =back
 
 =head1 CHANGES
+
+B<Version 1.7> - July 11th, 2003
+
+=over 4
+
+=item * By default, we now strip off whitespace unless verbMultiLine is in place.  This makes sense for things like conf files where trailing whitespace has no meaning. Thanks to pudge for reporting this.
+
+=back
 
 B<Version 1.7> - June 25th, 2003
 

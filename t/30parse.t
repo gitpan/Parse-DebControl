@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 58;
+use Test::More tests => 63;
 
 BEGIN {
         chdir 't' if -d 't';
@@ -20,7 +20,7 @@ my $mod = "Parse::DebControl";
 	ok(!$pdc->parse_mem(), "Parser should fail if not given a name");
 	ok(!$pdc->parse_file(), "Parser should fail if not given a filename");
 
-#Single item (no ending newline) parsing - 5 tests
+#Single item (no ending newline) parsing - 8 tests
 
 	my $data;
 	ok($data = $pdc->parse_mem("Description: foo"), "Parser for one-line returns valid data");
@@ -28,6 +28,10 @@ my $mod = "Parse::DebControl";
 	ok($data->[0]->{Description} eq "foo", "...and is the correct value");
 	ok(@$data == 1, "...and there's only one stanza");
 	ok(keys %{$data->[0]} == 1, "...and there's only item in the stanza");
+
+	ok($data = $pdc->parse_mem("Description: foo "), "Parser for one-line with trailing whitespace");
+	ok(exists($data->[0]->{Description}), "...and the data exists");
+	ok($data->[0]->{Description} eq "foo", "...and is the correct whitespace-stripped-value");
 
 #Multiple item (no ending newline) parsing - 6 tests
 
@@ -100,7 +104,7 @@ my $mod = "Parse::DebControl";
 	ok($data->[0]->{Key2} eq "value2", "...and the second value is correct");
 	ok($data->[0]->{Key3} eq "value3", "...and the third value is correct");
 
-#verbatim tests - 4 tests
+#verbatim tests - 10 tests
 
 	ok($data = $pdc->parse_mem("Key1: value1\n Testing1\n Testing2\n Testing3", {verbMultiLine => 1}), "Multiline verbatim option parses correctly");
 	ok(@$data == 1,"...and there is one stanza");
@@ -111,3 +115,7 @@ my $mod = "Parse::DebControl";
 	ok(@$data == 1, "...and there is one stanza");
 	ok(keys %{$data->[0]} == 1, "...and the first stanza is the right size");
 	ok($data->[0]->{Key1} eq "value1\n Testing1\n .\n Testing2", "... and the dot stays in per expected behaviour");
+
+	ok($data = $pdc->parse_mem("Key1: value1 ", {verbMultiLine => 1}), "Single line verbatim option parses correctly, (verbatim whitespace save test)");
+	ok($data->[0]->{Key1} eq "value1 ", "verbMultiLine does not collapse trailing whitespace");
+	
