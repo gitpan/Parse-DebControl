@@ -18,22 +18,20 @@ my $mod = "Parse::DebControl";
 
 SKIP: {
 	skip "/tmp not available. Either not-unix or not standard unix", 8 unless(-d "/tmp");
+	skip "/tmp not writable. Skipping write tests", 8 unless(-w "/tmp");
 	my $fh;
 	my $file = "/tmp/pdc_testfile".int(rand(10000));
-	skip "/tmp not writable. Skipping write tests", 8 unless(open $fh, ">>$file");
-	close $file;
-	unlink $file;
 
-	ok($pdc->write_file($file, {"key1" => "value1", "key2" => "value2"}), "File write is okay");
+	ok($pdc->write_file($file, {"key1" => "value1", "key2" => "value2"}, {"clobberFile" => 1}), "File write is okay");
 	ok(my $data = $pdc->parse_file($file), "...and re-parsing is correct");
 	ok($data->[0]->{key1} eq "value1", "...and the first key is correct");
 	ok($data->[0]->{key2} eq "value2", "...and the second key is correct");
 	unlink $file;
 
-	ok($pdc->write_file($file, {"key1" => "value1", "key2" => "value2"}, {"gzip" => 1}), "Writing file with gzip is okay");
+	ok($pdc->write_file($file, {"key1" => "value3", "key2" => "value4"}, {"gzip" => 1, "clobberFile" => 1}), "Writing file with gzip is okay");
 	ok($data = $pdc->parse_file($file, {tryGzip => 1}), "...and parsing the zipped file is correct");
-	ok($data->[0]->{key1} eq "value1", "...and the first key is correct");
-	ok($data->[0]->{key2} eq "value2", "...and the second key is correct");
+	ok($data->[0]->{key1} eq "value3", "...and the first key is correct");
+	ok($data->[0]->{key2} eq "value4", "...and the second key is correct");
 
 	unlink $file;
 

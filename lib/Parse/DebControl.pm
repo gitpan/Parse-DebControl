@@ -15,7 +15,7 @@ use Compress::Zlib;
 use LWP::UserAgent;
 
 use vars qw($VERSION);
-$VERSION = '2.001';
+$VERSION = '2.002';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -574,6 +574,14 @@ It is useful for nailing down any format or internal problems.
 =back
 
 =head1 CHANGES
+
+B<Version 2.002> - October 7th, 2003
+
+=over 4
+
+=item * No code changes. Fixes to test suite
+
+=back
 
 B<Version 2.001> - September 11th, 2003
 

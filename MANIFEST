@@ -11,3 +11,4 @@ t/42writefile.t
 Makefile.PL
 MANIFEST
 CHANGES
+META.yml                                 Module meta-data (added by MakeMaker)
