@@ -6,7 +6,7 @@ WriteMakefile(
 	'PREREQ_PM'	=>
 		{ 
 			'Test::More' => '0.45',
-			'IO::Scalar' => '2.104'
+			'IO::Scalar' => '2.104',
 		},
 
 	'dist'		=> 

@@ -2,6 +2,7 @@ Parse/DebControl.pm
 t/10objects.t
 t/20new.t
 t/30parse.t
+t/40write.t
 Makefile.PL
 MANIFEST
 CHANGES

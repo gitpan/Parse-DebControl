@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 28;
+use Test::More tests => 44;
 
 BEGIN {
         chdir 't' if -d 't';
@@ -58,3 +58,34 @@ my $mod = "Parse::DebControl";
 	ok(@$data == 1, "...and there is one stanza");
 	ok(keys %{$data->[0]} == 1, "...and the first stanza is the right size"); 
 	ok($data->[0]->{Description} eq "Item1\nHello\nWorld\n\nAgain", "...and the data is correct");
+
+#Single Stanza (Tie::IxHash test) - 6 tests
+
+	SKIP: {
+		eval { require Tie::IxHash };
+		skip "Tie::IxHash is not installed", 6 if($@);
+
+		ok($data = $pdc->parse_mem("Description: item\nCorona: GoodWithLime\nOther-Item: here\n\n", {'useTieIxHash' => 1}), "Parse a single stanza item with Tie::IxHash support");
+		ok(@$data == 1, "...and there is one stanza");
+		ok(keys %{$data->[0]} == 3, "...and the stanza is the right size");
+		ok((keys %{$data->[0]})[0] eq "Description", "...and the order is right (first item)");
+		ok((keys %{$data->[0]})[1] eq "Corona", "...and the order is right (second item)");
+		ok((keys %{$data->[0]})[2] eq "Other-Item", "...and the order is right (third item)");
+		
+	}
+
+#Single Stanza using caseDiscard - 6 tests
+
+	ok($data = $pdc->parse_mem("Key1: value1\nKey2: value2\nKEY3: Value3", {'discardCase' => 1}), "Parse a simple structure with discardCase");
+	ok(@$data == 1, "...and there is one stanza");
+	ok(keys %{$data->[0]} == 3, "...and the stanza is the right size");
+	ok((exists($data->[0]->{key1}) and $data->[0]->{key1} eq "value1"), "The first entry exists and has the right value");
+	ok((exists($data->[0]->{key2}) and $data->[0]->{key2} eq "value2"), "...and the second value");
+	ok((exists($data->[0]->{key3}) and $data->[0]->{key3} eq "Value3"), "...and the third value");
+
+#Side conditions - 4 tests
+
+	ok($data = $pdc->parse_mem("Key1:\nKey2: value2\nkey3: value3"), "Parse a simple structure with a bad (blank) value");
+	ok(@$data == 1, "...and there is one stanza");
+	ok(keys %{$data->[0]} == 3, "...and the stanza is the right size");
+	ok($data->[0]->{Key1} eq "", "...and the blank key is correct");

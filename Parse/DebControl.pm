@@ -13,10 +13,10 @@ use strict;
 use IO::Scalar;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.0';
+$VERSION = '1.1';
 
 @ISA=qw(Exporter);
-@EXPORT=qw/new parse_file parse_mem DEBUG/;
+@EXPORT=qw/new parse_file parse_mem write_file write_mem DEBUG/;
 
 sub new {
 	my ($class, $debug) = @_;
@@ -31,7 +31,7 @@ sub new {
 };
 
 sub parse_file {
-	my ($this, $filename) = @_;
+	my ($this, $filename, $options) = @_;
 	unless($filename)
 	{
 		$this->_dowarn("parse_file failed because no filename parameter was given");
@@ -45,11 +45,11 @@ sub parse_file {
 		return;
 	}
 	
-	return $this->_parseDataHandle($fh);
+	return $this->_parseDataHandle($fh, $options);
 };
 
 sub parse_mem {
-	my ($this, $data) = @_;
+	my ($this, $data, $options) = @_;
 
 	unless($data)
 	{
@@ -65,9 +65,58 @@ sub parse_mem {
 		return;
 	}
 
-	return $this->_parseDataHandle($IOS);
+	return $this->_parseDataHandle($IOS, $options);
 
 };
+
+sub write_file {
+	my ($this, $filenameorhandle, $dataorarrayref, $options) = @_;
+
+	unless($filenameorhandle)
+	{
+		$this->_dowarn("write_file failed because no filename or filehandle was given");
+		return;
+	}
+
+	unless($dataorarrayref)
+	{
+		$this->_dowarn("write_file failed because no data was given");
+		return;
+	}
+
+	my $handle = $this->_getValidHandle($filenameorhandle, $options);
+
+	unless($handle)
+	{
+		$this->_dowarn("write_file failed because we couldn't negotiate a valid handle");
+		return;
+	}
+
+	my $arrayref = $this->_makeArrayref($dataorarrayref);
+
+	my $string = $this->_makeControl($arrayref);
+	
+	print $handle $string;
+	close $handle;
+
+	return length($string);
+}
+
+sub write_mem {
+	my ($this, $dataorarrayref, $options) = @_;
+
+	unless($dataorarrayref)
+	{
+		$this->_dowarn("write_mem failed because no data was given");
+		return;
+	}
+
+	my $arrayref = $this->_makeArrayref($dataorarrayref);
+
+	my $string = $this->_makeControl($arrayref);
+
+	return $string;
+}
 
 sub DEBUG
 {
@@ -78,9 +127,84 @@ sub DEBUG
 
 }
 
+sub _getValidHandle {
+	my($this, $filenameorhandle, $options) = @_;
+
+	if(ref $filenameorhandle eq "GLOB")
+	{
+		unless($filenameorhandle->opened())
+		{
+			$this->_dowarn("Can't get a valid filehandle to write to, because that is closed");
+			return;
+		}
+
+		return $filenameorhandle;
+	}else
+	{
+		my $openmode = ">>";
+		$openmode=">" if $options->{clobberFile};
+		$openmode=">>" if $options->{appendFile};
+
+		my $handle;
+
+		unless(open $handle,"$openmode$filenameorhandle")
+		{
+			$this->_dowarn("Couldn't open file: $openmode$filenameorhandle for writing");
+			return;
+		}
+
+		return $handle;
+	}
+}
+
+sub _makeArrayref {
+	my ($this, $dataorarrayref) = @_;
+
+        if(ref $dataorarrayref eq "ARRAY")
+        {
+		return $dataorarrayref;
+        }else{
+		return [$dataorarrayref];
+	}
+}
+
+sub _makeControl
+{
+	my ($this, $dataorarrayref) = @_;
+	
+	my $str;
+
+	foreach my $stanza(@$dataorarrayref)
+	{
+		foreach my $key(keys %$stanza)
+		{
+			my @lines = split("\n", $stanza->{$key});
+			$str.="$key\: ".(shift @lines)."\n";
+
+			foreach(@lines)
+			{
+				if($_ eq "")
+				{
+					$str.=" .\n";
+				}
+				else{
+					$str.=" $_\n";
+				}
+			}
+
+		}
+
+		$str.="\n";
+	}
+
+	chomp($str);
+	return $str;
+	
+}
+
 sub _parseDataHandle
 {
-	my ($this, $handle) = @_;
+	my ($this, $handle, $options) = @_;
 
 	my $structs;
 
@@ -91,6 +215,18 @@ sub _parseDataHandle
 	}
 
 	my $data;
+
+	if($options->{useTieIxHash})
+	{
+		eval("use Tie::IxHash");
+		if($@)
+		{
+			$this->_dowarn("Can't use Tie::IxHash. You need to install it to have this functionality");
+			return;
+		}
+		tie(%$data, "Tie::IxHash");
+	}
+
 	my $linenum = 0;
 	my $lastfield = "";
 
@@ -104,8 +240,16 @@ sub _parseDataHandle
 			#we have a valid key-value pair
 			if($line =~ /(.*?)\s*\:\s*(.*)$/)
 			{
-				$data->{$1} = $2;
-				$lastfield = $1;
+				my $key = $1;
+				my $value = $2;
+
+				if($options->{discardCase})
+				{
+					$key = lc($key);					
+				}
+
+				$data->{$key} = $value;
+				$lastfield = $key;
 			}else{
 				$this->_dowarn("Parse error on line $linenum of data; invalid key/value stanza");
 				return $structs;
@@ -176,8 +320,19 @@ Parse::DebControl - Easy OO parsing of debian control-like files
 
 	$parser = new Parse::DebControl;
 
-	$data = $parser->parse_mem($control_data);
-	$data = $parser->parse_file('./debian/control');
+	$data = $parser->parse_mem($control_data, %options);
+	$data = $parser->parse_file('./debian/control', %options);
+
+	$writer = new Parse::DebControl;
+
+	$string = $writer->write_mem($singlestanza);
+	$string = $writer->write_mem([$stanza1, $stanza2]);
+
+	$writer->write_file($filename, $singlestanza, %options);
+	$writer->write_file($filename, [$stanza1, $stanza2], %options);
+
+	$writer->write_file($handle, $singlestanza, %options);
+	$writer->write_file($handle, [$stanza1, $stanza2], %options);
 
 	$parser->DEBUG();
 
@@ -211,7 +366,7 @@ passed in, it turns on debugging, similar to a call to C<DEBUG()> (see below);
 
 =over 4
 
-=item * C<parse_file($control_filename)>
+=item * C<parse_file($control_filename,I<%options>)>
 
 Takes a scalar containing formatted data. Will parse as much as it can, 
 warning (if C<DEBUG>ing is turned on) on parsing errors. 
@@ -221,14 +376,63 @@ by stanza.  Stanzas are deliniated by newlines, and multi-line fields are
 expressed as such post-parsing.  Single periods are treated as special extra
 newline deliniators, per convention.
 
+The options hash can take parameters as follows. Setting the string to true
+enables the option.
+
+	useTieIxHash - Instead of an array of regular hashes, uses Tie::IxHash-
+		based hashes
+	discardCase  - Remove all case items from keys (not values)		
+
 =back
 
 =over 4
 
-=item * C<parse_mem($control_data)>
+=item * C<parse_mem($control_data, I<%options>)>
 
 Similar to C<parse_file>, except takes data as a scalar. Returns the same
-array of hashrefs;
+array of hashrefs as C<parse_file>. The options hash is the same as 
+C<parse_file> as well; see above.
+
+=back
+
+=over 4
+
+=item * C<write_file($filename, $data, I<%options>)>
+
+=item * C<write_file($handle, $data>
+
+=item * C<write_file($filename, [$data1, $data2, $data3], I<%options>)>
+
+=item * C<write_file($handle, [$data, $data2, $data3])>
+
+This function takes a filename or a handle and writes the data out.  The 
+data can be given as a single hash(ref) or as an arrayref of hash(ref)s. It
+will then write it out in a format that it can parse. The order is dependant
+on your hash sorting order. If you care, use Tie::IxHash.  Remember for 
+reading back in, the module doesn't care.
+
+The I<%options> hash can contain one of the following two items:
+
+	appendFile  - (default) Write to the end of the file
+	clobberFile - Overwrite the file given.
+
+Since you determine the mode of your filehandle, passing it an options hash
+obviously won't do anything; rather, it is ignored.
+
+This function returns the number of bytes written to the file, undef 
+otherwise.
+
+=back
+
+=over 4
+
+=item * C<write_mem($data)>
+
+=item * C<write_mem([$data1,$data2,$data3])>;
+
+This function works similarly to the C<write_file> method, except it returns
+the control structure as a scalar, instead of writing it to a file.  There
+is no I<%options> for this file (yet);
 
 =back
 
@@ -246,6 +450,14 @@ It is useful for nailing down any format or internal problems.
 
 =over 4
 
+=item * B<Version 1.1> - April 23rd, 2003
+
+Added:
+
+	* Writing support
+	* Tie::IxHash support
+	* Case insensitive reading support
+
 =item * B<Version 1.0> - April 23rd, 2003
 
 This is the initial public release for CPAN, so everything is new.
@@ -254,19 +466,16 @@ This is the initial public release for CPAN, so everything is new.
 
 =head1 BUGS
 
-None that I know of.  Please report any to jaybonci@cpan.org
+The module will let you parse otherwise illegal key-value pairs and pairs
+with spaces. This is by design. In future versions, it may give you a warning.
 
 =head1 TODO
 
 =over 4
 
-=item Tie::IxHash support
+=item Handle line wrapping for long lines, maybe. 
 
-=item Control file writing (as compared to writing)
-
-=item Case-insensitive hash construction
-
-These items will be implemented as as an options hash to the parsing functions
+	I'm debating whether or not this is outside the scope of this module
 
 =back
 
