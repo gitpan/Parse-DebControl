@@ -7,6 +7,7 @@ t/32trygzip.t
 t/33parseweb.t
 t/40write.t
 t/41writegzip.t
+t/42writefile.t
 Makefile.PL
 MANIFEST
 CHANGES

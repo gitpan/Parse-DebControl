@@ -1,0 +1,40 @@
+#!/usr/bin/perl -w
+
+use Test::More tests => 10;
+use Compress::Zlib;
+
+BEGIN {
+        chdir 't' if -d 't';
+        use lib '../blib/lib', 'lib/', '..';
+}
+
+
+my $mod = "Parse::DebControl";
+
+#Object initialization - 2 tests
+
+	use_ok($mod);
+	ok($pdc = new Parse::DebControl(), "Parser object creation works fine");
+
+SKIP: {
+	skip "/tmp not available. Either not-unix or not standard unix", 8 unless(-d "/tmp");
+	my $fh;
+	my $file = "/tmp/pdc_testfile".int(rand(10000));
+	skip "/tmp not writable. Skipping write tests", 8 unless(open $fh, ">>$file");
+	close $file;
+	unlink $file;
+
+	ok($pdc->write_file($file, {"key1" => "value1", "key2" => "value2"}), "File write is okay");
+	ok(my $data = $pdc->parse_file($file), "...and re-parsing is correct");
+	ok($data->[0]->{key1} eq "value1", "...and the first key is correct");
+	ok($data->[0]->{key2} eq "value2", "...and the second key is correct");
+	unlink $file;
+
+	ok($pdc->write_file($file, {"key1" => "value1", "key2" => "value2"}, {"gzip" => 1}), "Writing file with gzip is okay");
+	ok($data = $pdc->parse_file($file, {tryGzip => 1}), "...and parsing the zipped file is correct");
+	ok($data->[0]->{key1} eq "value1", "...and the first key is correct");
+	ok($data->[0]->{key2} eq "value2", "...and the second key is correct");
+
+	unlink $file;
+
+};

@@ -15,7 +15,7 @@ use Compress::Zlib;
 use LWP::UserAgent;
 
 use vars qw($VERSION);
-$VERSION = '2.0';
+$VERSION = '2.001';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -120,9 +120,7 @@ sub write_file {
 		return;
 	}
 
-	my $arrayref = $this->_makeArrayref($dataorarrayref);
-
-	my $string = $this->_makeControl($arrayref);
+	my $string = $this->write_mem($dataorarrayref, $options);
 	$string ||= "";
 	
 	print $handle $string;
@@ -527,7 +525,7 @@ above
 
 =item * C<write_file($filename, $data, I<$options>)>
 
-=item * C<write_file($handle, $data>
+=item * C<write_file($handle, $data)>
 
 =item * C<write_file($filename, [$data1, $data2, $data3], I<$options>)>
 
@@ -576,6 +574,18 @@ It is useful for nailing down any format or internal problems.
 =back
 
 =head1 CHANGES
+
+B<Version 2.001> - September 11th, 2003
+
+=over 4
+
+=item * Cleaned up more POD errors
+
+=item * Added tests for file writing
+
+=item * Fixed bug where write_file ignored the gzip parameter
+
+=back
 
 B<Version 2.0> - September 5th, 2003
 

@@ -7,9 +7,9 @@ WriteMakefile(
 		{ 
 			'Test::More' => '0.45',
 			'IO::Scalar' => '2.104',
-			'Compress::Zlib' => '',
-			'LWP::UserAgent' => '',
-			'LWP::Simple' => '',
+			'Compress::Zlib' => '0',
+			'LWP::UserAgent' => '0',
+			'LWP::Simple' => '0',
 		},
 
 	($] >= 5.005 ?    ## Add these new keywords supported since 5.005
