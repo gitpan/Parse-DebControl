@@ -1,0 +1,6 @@
+Some sort of chunked stanza output format.  
+
+If you stream stanza pieces, there needs to be a way to specify the end of a stanza.
+
+Test suite for file reading.  Just in case.
+

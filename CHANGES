@@ -1,3 +1,9 @@
+Version 1.6 - June 2nd, 2003
+
+	* Cleaned up some warnings when you pass in empty hashrefs or arrayrefs
+	* Added stripComments setting
+	* Cleaned up POD errors
+	
 Version 1.5 - May 8th, 2003
 
 	* Added a line to quash errors with undef hashkeys and writing

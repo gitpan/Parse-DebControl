@@ -13,7 +13,7 @@ use strict;
 use IO::Scalar;
 
 use vars qw($VERSION);
-$VERSION = '1.5';
+$VERSION = '1.6';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -92,6 +92,7 @@ sub write_file {
 	my $arrayref = $this->_makeArrayref($dataorarrayref);
 
 	my $string = $this->_makeControl($arrayref);
+	$string ||= "";
 	
 	print $handle $string;
 	close $handle;
@@ -197,6 +198,7 @@ sub _makeControl
 
 		}
 
+		$str ||= "";
 		$str.="\n";
 	}
 
@@ -226,6 +228,12 @@ sub _parseDataHandle
 	{
 		#Sometimes with IO::Scalar, lines may have a newline at the end
 		chomp $line;
+
+		if($options->{stripComments}){
+			next if $line =~ /^\s*\#/;
+			$line =~ s/\#.*// 
+		}
+
 		$linenum++;
 		if($line =~ /^[^\t\s]/)
 		{
@@ -394,6 +402,7 @@ enables the option.
 	useTieIxHash - Instead of an array of regular hashes, uses Tie::IxHash-
 		based hashes
 	discardCase  - Remove all case items from keys (not values)		
+	stripComments - Remove all commented lines in standard #comment format
 
 =back
 
@@ -460,12 +469,24 @@ It is useful for nailing down any format or internal problems.
 
 =head1 CHANGES
 
+B<Version 1.6> - June 2nd, 2003
+
+=over 4
+
+=item * Cleaned up some warnings when you pass in empty hashrefs or arrayrefs
+=item * Added stripComments setting
+=item * Cleaned up POD errors
+
+=back
+
 B<Version 1.5> - May 8th, 2003
 
 =over 4
 
 =item * Added a line to quash errors with undef hashkeys and writing
 =item * Fixed the Makefile.PL to straighten up DebControl.pm being in the wrong dir
+
+=back
 
 B<Version 1.4> - April 30th, 2003
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 44;
+use Test::More tests => 50;
 
 BEGIN {
         chdir 't' if -d 't';
@@ -89,3 +89,12 @@ my $mod = "Parse::DebControl";
 	ok(@$data == 1, "...and there is one stanza");
 	ok(keys %{$data->[0]} == 3, "...and the stanza is the right size");
 	ok($data->[0]->{Key1} eq "", "...and the blank key is correct");
+
+#stripComments - 6 tests
+
+	ok($data = $pdc->parse_mem("Key1: value1\n\#This is a comment\nKey2: value2#another comment\nKey3: value3", {stripComments => 1}), "Comments parse out correctly");
+	ok(@$data == 1, "...and there are two stanzas");
+	ok(keys %{$data->[0]} == 3, "...and the first stanza is the right size");
+	ok($data->[0]->{Key1} eq "value1", "...and the first value is correct");
+	ok($data->[0]->{Key2} eq "value2", "...and the second value is correct");
+	ok($data->[0]->{Key3} eq "value3", "...and the third value is correct");

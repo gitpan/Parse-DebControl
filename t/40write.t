@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 11;
+use Test::More tests => 12;
 
 my $warning ="";
 
@@ -43,3 +43,10 @@ SKIP: 	{
 		}
 	}
 
+my $warnings = "";
+
+local $SIG{__WARN__} = sub { $warnings = $_};
+
+my $mem = $writer->write_mem([{}]);
+
+ok($warnings eq "", "Writing blank hashrefs doesn't throw warnings"); #Version 1.6 fix
