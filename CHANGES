@@ -1,3 +1,9 @@
+Version 2.003 - January 6th, 2003
+
+	* Added optional Test::Pod test
+	* Skips potential Win32 test failure in the module where it wants to write to /tmp.
+	* Added optional Pod::Coverage test
+
 Version 2.002 - October 7th, 2003
 	
 	* No code changes. Fixes to test suite

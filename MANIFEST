@@ -8,6 +8,8 @@ t/33parseweb.t
 t/40write.t
 t/41writegzip.t
 t/42writefile.t
+t/50pod.t
+t/51podcoverage.t
 Makefile.PL
 MANIFEST
 CHANGES

@@ -18,7 +18,9 @@ my $mod = "Parse::DebControl";
 
 SKIP: {
 	skip "/tmp not available. Either not-unix or not standard unix", 8 unless(-d "/tmp");
-	skip "/tmp not writable. Skipping write tests", 8 unless(-w "/tmp");
+	skip "/tmp not writable. Skipping write tests", 8 unless(-d "/tmp" and -w "/tmp");
+	skip "Windows /tmp wierdness. No thanks", 8 if($^O =~ /Win32/);
+
 	my $fh;
 	my $file = "/tmp/pdc_testfile".int(rand(10000));
 

@@ -15,7 +15,7 @@ use Compress::Zlib;
 use LWP::UserAgent;
 
 use vars qw($VERSION);
-$VERSION = '2.002';
+$VERSION = '2.003';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -574,6 +574,18 @@ It is useful for nailing down any format or internal problems.
 =back
 
 =head1 CHANGES
+
+B<Version 2.003> - January 6th, 2003
+
+=over 4
+
+=item * Added optional Test::Pod test
+
+=item * Skips potential Win32 test failure in the module where it wants to write to /tmp.
+
+=item * Added optional Pod::Coverage test
+
+=back
 
 B<Version 2.002> - October 7th, 2003
 
