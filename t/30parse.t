@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 50;
+use Test::More tests => 58;
 
 BEGIN {
         chdir 't' if -d 't';
@@ -92,9 +92,22 @@ my $mod = "Parse::DebControl";
 
 #stripComments - 6 tests
 
+	$pdc = new Parse::DebControl(1);
 	ok($data = $pdc->parse_mem("Key1: value1\n\#This is a comment\nKey2: value2#another comment\nKey3: value3", {stripComments => 1}), "Comments parse out correctly");
 	ok(@$data == 1, "...and there are two stanzas");
 	ok(keys %{$data->[0]} == 3, "...and the first stanza is the right size");
 	ok($data->[0]->{Key1} eq "value1", "...and the first value is correct");
 	ok($data->[0]->{Key2} eq "value2", "...and the second value is correct");
 	ok($data->[0]->{Key3} eq "value3", "...and the third value is correct");
+
+#verbatim tests - 4 tests
+
+	ok($data = $pdc->parse_mem("Key1: value1\n Testing1\n Testing2\n Testing3", {verbMultiLine => 1}), "Multiline verbatim option parses correctly");
+	ok(@$data == 1,"...and there is one stanza");
+	ok(keys %{$data->[0]} == 1, "...and the first stanza is the right size");
+	ok($data->[0]->{Key1} eq "value1\n Testing1\n Testing2\n Testing3", "...and the data works out correctly");
+
+	ok($data = $pdc->parse_mem("Key1: value1\n Testing1\n .\n Testing2", {verbMultiLine => 1}), "Multiline verbatim option parses correctly (with a period line");
+	ok(@$data == 1, "...and there is one stanza");
+	ok(keys %{$data->[0]} == 1, "...and the first stanza is the right size");
+	ok($data->[0]->{Key1} eq "value1\n Testing1\n .\n Testing2", "... and the dot stays in per expected behaviour");

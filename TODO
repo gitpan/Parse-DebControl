@@ -4,3 +4,4 @@ If you stream stanza pieces, there needs to be a way to specify the end of a sta
 
 Test suite for file reading.  Just in case.
 
+Check to see if \r\n breaks us

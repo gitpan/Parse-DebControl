@@ -13,7 +13,7 @@ use strict;
 use IO::Scalar;
 
 use vars qw($VERSION);
-$VERSION = '1.6.1';
+$VERSION = '1.7';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -249,13 +249,18 @@ sub _parseDataHandle
 				}
 
 				$data->{$key} = $value;
+
+				if ($options->{verbMultiLine} 
+				    && (($data->{$lastfield} || "") =~ /\n/o)){
+				    $data->{$lastfield} .= "\n";
+				}
 				$lastfield = $key;
 			}else{
 				$this->_dowarn("Parse error on line $linenum of data; invalid key/value stanza");
 				return $structs;
 			}
 
-		}elsif($line =~ /^[\t\s](.*)/)
+		}elsif($line =~ /^([\t\s])(.*)/)
 		{
 			#appends to previous line
 
@@ -264,15 +269,19 @@ sub _parseDataHandle
 				$this->_dowarn("Parse error on line $linenum of data; indented entry without previous line");
 				return $structs;
 			}
-			if($1 eq ".")
-			{
-				$data->{$lastfield}.="\n";
-			}else
-			{
-				$data->{$lastfield}.="\n$1";
+			if($options->{verbMultiLine}){
+			    $data->{$lastfield}.="\n$1$2";
+			}elsif($2 eq "." ){
+			    $data->{$lastfield}.="\n";
+			}else{
+			    $data->{$lastfield}.="\n$2";
 			}
 
 		}elsif($line =~ /^[\s\t]*$/){
+		        if ($options->{verbMultiLine} 
+			    && ($data->{$lastfield} =~ /\n/o)) {
+			    $data->{$lastfield} .= "\n";
+			}
 			if(keys %$data > 0){
 				push @$structs, $data;
 			}
@@ -388,7 +397,7 @@ passed in, it turns on debugging, similar to a call to C<DEBUG()> (see below);
 
 =item * C<parse_file($control_filename,I<%options>)>
 
-Takes a scalar containing formatted data. Will parse as much as it can, 
+Takes a filename as a scalar. Will parse as much as it can, 
 warning (if C<DEBUG>ing is turned on) on parsing errors. 
 
 Returns an array of hashes, containing the data in the control file, split up
@@ -403,6 +412,8 @@ enables the option.
 		based hashes
 	discardCase  - Remove all case items from keys (not values)		
 	stripComments - Remove all commented lines in standard #comment format
+	verbMultiLine - Keep the description AS IS, and no not collapse leading
+		spaces or dots as newlines.
 
 =back
 
@@ -468,6 +479,18 @@ It is useful for nailing down any format or internal problems.
 =back
 
 =head1 CHANGES
+
+B<Version 1.7> - June 25th, 2003
+
+=over 4
+
+=item * POD documentation error noticed again by Frank Lichtenheld
+
+=item * Also by Frank, applied a patch to add a "verbMultiLine" option so that we can hand multiline fields back unparsed.
+
+=item * Slightly expanded test suite to cover new features
+
+=back
 
 B<Version 1.6.1> - June 9th, 2003
 

@@ -1,3 +1,9 @@
+Version 1.7 - June 25th, 2003
+	
+	* POD documentation error noticed again by Frank Lichtenheld
+	* Also by Frank, applied a patch to add a "verbMultiLine" option so that we can hand multiline fields back unparsed.
+	* Slightly expanded test suite to cover new features
+
 Version 1.6.1 - June 9th, 2003
 
 	* POD cleanups noticed by Frank Lichtenheld. Thank you, Frank.	
