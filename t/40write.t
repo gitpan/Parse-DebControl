@@ -20,13 +20,17 @@ ok(!$writer->write_file('/fake/file'), "write_file should fail without data");
 
 ok($writer->write_mem({'foo' => 'bar'}) eq "foo: bar\n", "write_* should translate simple items correctly");
 
-my $test1 = "Test: Item1\nTest2: Item2\nTest3: Item3\n";
-my $test2 = "Test: Items\n Hello\n There\n .\n World\nAnother-item: world\n";
-my $i = 1;
+SKIP: 	{
+		eval { require Tie::IxHash };
+		skip "Tie::IxHash is not installed", 3 if($@);
 
-foreach($test1, $test2, "$test1\n$test2"){
-	ok($writer->write_mem($writer->parse_mem($_, {'useTieIxHash' => 1})) eq $_, "...Fidelity test $i");
-	$i++;
-}
+		my $test1 = "Test: Item1\nTest2: Item2\nTest3: Item3\n";
+		my $test2 = "Test: Items\n Hello\n There\n .\n World\nAnother-item: world\n";
+		my $i = 1;
 
+		foreach($test1, $test2, "$test1\n$test2"){
+			ok($writer->write_mem($writer->parse_mem($_, {'useTieIxHash' => 1})) eq $_, "...Fidelity test $i");
+			$i++;
+		}
+	}
 

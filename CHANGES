@@ -1,3 +1,15 @@
+Version 1.2b - April 25, 2003
+
+Fixed:
+
+        * A bug in the test suite where IxHash was not disabled in 40write.t. Thanks to Jeroen Latour from cpan-testers for the report
+
+Version 1.2 - April 24th, 2003
+
+Fixed:
+
+        * A bug in IxHash support where multiple stanzas might be out of order
+
 Version 1.1 - April 23rd, 2003
 
 Added:

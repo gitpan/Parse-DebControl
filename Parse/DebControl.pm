@@ -13,7 +13,7 @@ use strict;
 use IO::Scalar;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.2';
+$VERSION = '1.2b';
 
 @ISA=qw(Exporter);
 @EXPORT=qw/new parse_file parse_mem write_file write_mem DEBUG/;
@@ -459,12 +459,16 @@ It is useful for nailing down any format or internal problems.
 
 =over 4
 
+=item * B<Version 1.2b> - April 25th, 2003
+
+Fixed:
+	* A bug in the test suite where IxHash was not disabled in 40write.t. Thanks to Jeroen Latour from cpan-testers for the report.
+
 =item * B<Version 1.2> - April 24th, 2003
 
 Fixed:
 
-	* A bug in IxHash support where multiple stanzas
-		might be out of order
+	* A bug in IxHash support where multiple stanzas might be out of order
 
 =item * B<Version 1.1> - April 23rd, 2003
 
