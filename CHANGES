@@ -1,4 +1,9 @@
 CHANGES
+     Version 2.005 - January 13th, 2004
+
+     * More generic test suite fix for earlier versions of Test::More
+     * Updated copyright statement
+
      Version 2.004 - January 12th, 2004
 
      * More documentation formatting and typo fixes

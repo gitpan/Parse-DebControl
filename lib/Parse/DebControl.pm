@@ -15,7 +15,7 @@ use Compress::Zlib;
 use LWP::UserAgent;
 
 use vars qw($VERSION);
-$VERSION = '2.004';
+$VERSION = '2.005';
 
 sub new {
 	my ($class, $debug) = @_;
@@ -584,6 +584,16 @@ It is useful for nailing down any format or internal problems.
 
 =head1 CHANGES
 
+B<Version 2.005> - January 13th, 2004
+
+=over 4
+
+=item * More generic test suite fix for earlier versions of Test::More
+
+=item * Updated copyright statement
+
+=back
+
 B<Version 2.004> - January 12th, 2004
 
 =over 4
@@ -794,7 +804,7 @@ Change the name over to the Debian:: namespace, probably as Debian::ControlForma
 
 =head1 COPYRIGHT
 
-Parse::DebControl is copyright 2003 Jay Bonci E<lt>jaybonci@cpan.orgE<gt>.
+Parse::DebControl is copyright 2003,2004 Jay Bonci E<lt>jaybonci@cpan.orgE<gt>.
 This program is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
 
